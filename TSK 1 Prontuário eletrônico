@@ -1,0 +1,206 @@
+// app.js
+// Sistema de prontuário com LinkedList + menu interativo
+// Agora com data DD-MM-YYYY e hora HH:MM
+
+// ==========================
+// CONSULTA (Nó)
+// ==========================
+class Consultation {
+    constructor(dateObj, doctor, diagnosis) {
+        this.date = dateObj;   // já vem validado e convertido
+        this.doctor = doctor;
+        this.diagnosis = diagnosis;
+        this.next = null;
+    }
+
+    toString() {
+        const d = this.date;
+
+        // formata na saída
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+
+        const hours = String(d.getHours()).padStart(2, "0");
+        const minutes = String(d.getMinutes()).padStart(2, "0");
+
+        return ${day}-${month}-${year} ${hours}:${minutes} | Dr(a). ${this.doctor} | ${this.diagnosis};
+    }
+}
+
+
+
+// ==========================
+// LINKED LIST - Histórico
+// ==========================
+class MedicalHistory {
+    constructor() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+
+    addConsultation(dateObj, doctor, diagnosis) {
+        const newNode = new Consultation(dateObj, doctor, diagnosis);
+
+        if (!this.head) {
+            this.head = this.tail = newNode;
+        } else {
+            this.tail.next = newNode;
+            this.tail = newNode;
+        }
+
+        this.size++;
+    }
+
+    printHistory() {
+        if (!this.head) {
+            console.log("\n⚠ Histórico vazio.\n");
+            return;
+        }
+
+        console.log("\n=== Histórico de Consultas ===");
+
+        let current = this.head;
+        let index = 1;
+
+        while (current) {
+            console.log(${index}. ${current.toString()});
+            current = current.next;
+            index++;
+        }
+
+        console.log(Total: ${this.size} consulta(s).\n);
+    }
+
+    clear() {
+        this.head = this.tail = null;
+        this.size = 0;
+        console.log("\n✔ Histórico limpo com sucesso!\n");
+    }
+}
+
+
+
+// ==========================
+// LEITURA INTERATIVA (async/await)
+// ==========================
+const readline = require("readline");
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function question(txt) {
+    return new Promise(resolve => rl.question(txt, ans => resolve(ans.trim())));
+}
+
+
+
+// ==========================
+// Conversão DD-MM-YYYY + HH:MM → Date
+// ==========================
+function parseDateAndTime(dateStr, timeStr) {
+    // DD-MM-YYYY
+    const dateParts = dateStr.split("-");
+    if (dateParts.length !== 3) {
+        throw new Error("Formato de data inválido (use DD-MM-YYYY)");
+    }
+
+    const [DD, MM, YYYY] = dateParts.map(Number);
+
+    // HH:MM
+    const timeParts = timeStr.split(":");
+    if (timeParts.length !== 2) {
+        throw new Error("Formato de hora inválido (use HH:MM)");
+    }
+
+    const [HH, MIN] = timeParts.map(Number);
+
+    // validações
+    if (DD < 1 || DD > 31) throw new Error("Dia inválido");
+    if (MM < 1 || MM > 12) throw new Error("Mês inválido");
+    if (HH < 0 || HH > 23) throw new Error("Hora inválida");
+    if (MIN < 0 || MIN > 59) throw new Error("Minuto inválido");
+
+    const dateObj = new Date(YYYY, MM - 1, DD, HH, MIN);
+
+    if (isNaN(dateObj.getTime())) {
+        throw new Error("Data/Hora inválida!");
+    }
+
+    return dateObj;
+}
+
+
+
+// ==========================
+// MENU PRINCIPAL
+// ==========================
+const history = new MedicalHistory();
+
+async function addConsultationMenu() {
+    console.log("\n=== Adicionar Consulta ===");
+
+    const dateStr = await question("Data (DD-MM-YYYY): ");
+    const timeStr = await question("Hora (HH:MM): ");
+    const doctor = await question("Nome do médico: ");
+    const diagnosis = await question("Diagnóstico: ");
+
+    if (!dateStr || !timeStr || !doctor || !diagnosis) {
+        throw new Error("Todos os campos são obrigatórios.");
+    }
+
+    // converte data e hora
+    const dateObj = parseDateAndTime(dateStr, timeStr);
+
+    // adiciona na lista
+    history.addConsultation(dateObj, doctor, diagnosis);
+    console.log("\n✔ Consulta adicionada com sucesso!\n");
+}
+
+async function mainMenu() {
+    while (true) {
+        console.log(`
+=====================================
+     SISTEMA DE PRONTUÁRIO (LinkedList)
+=====================================
+1 - Adicionar consulta
+2 - Mostrar histórico
+3 - Limpar histórico
+4 - Sair
+=====================================
+`);
+        const opt = await question("Escolha uma opção: ");
+
+        try {
+            switch (opt) {
+                case "1":
+                    await addConsultationMenu();
+                    break;
+                case "2":
+                    history.printHistory();
+                    break;
+                case "3":
+                    history.clear();
+                    break;
+                case "4":
+                    console.log("\nEncerrando...\n");
+                    rl.close();
+                    return;
+                default:
+                    console.log("\n❌ Opção inválida.\n");
+            }
+        } catch (err) {
+            console.log(\n❌ Erro: ${err.message}\n);
+        }
+    }
+}
+
+
+
+// ==========================
+// INICIAR SISTEMA
+// ==========================
+mainMenu();
