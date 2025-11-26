@@ -1,0 +1,192 @@
+const readline = require("readline");
+
+// =============== LINKED LIST (Prontuário) =============== //
+class ConsultationNode {
+    constructor(date, time, doctor, diagnosis) {
+        this.date = date;
+        this.time = time;
+        this.doctor = doctor;
+        this.diagnosis = diagnosis;
+        this.next = null;
+    }
+}
+
+class MedicalHistory {
+    constructor() {
+        this.head = null;
+    }
+
+    addConsultation(date, time, doctor, diagnosis) {
+        const newNode = new ConsultationNode(date, time, doctor, diagnosis);
+
+        if (!this.head) {
+            this.head = newNode;
+            return;
+        }
+
+        let current = this.head;
+        while (current.next) {
+            current = current.next;
+        }
+
+        current.next = newNode;
+    }
+
+    printHistory() {
+        if (!this.head) {
+            console.log("\n⚠ Nenhuma consulta cadastrada.");
+            return;
+        }
+
+        console.log("\n📘 HISTÓRICO MÉDICO DO PACIENTE:");
+
+        let current = this.head;
+        let count = 1;
+
+        while (current) {
+            console.log(\nConsulta #${count});
+            console.log(📅 Data: ${current.date});
+            console.log(⏰ Hora: ${current.time});
+            console.log(👨‍⚕ Médico: ${current.doctor});
+            console.log(📝 Diagnóstico: ${current.diagnosis});
+
+            current = current.next;
+            count++;
+        }
+    }
+
+    clearHistory() {
+        this.head = null;
+        console.log("\n🗑 Histórico apagado com sucesso!");
+    }
+}
+
+// =============== FILA DE EMERGÊNCIA (FIFO) =============== //
+class EmergencyQueue {
+    constructor() {
+        this.queue = [];
+    }
+
+    enqueue(patient) {
+        this.queue.push(patient);
+    }
+
+    dequeue() {
+        return this.queue.shift();
+    }
+
+    showQueue() {
+        if (this.queue.length === 0) {
+            console.log("\n🏥 Nenhum paciente aguardando.");
+            return;
+        }
+
+        console.log("\n🚑 PACIENTES NA FILA:");
+        this.queue.forEach((p, i) => {
+            console.log(${i + 1}. ${p});
+        });
+    }
+}
+
+// Instâncias
+const history = new MedicalHistory();
+const emergency = new EmergencyQueue();
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+// ============================= MENU ============================= //
+function menu() {
+    console.log(`
+=============== SISTEMA HIS ===============
+
+📘 PRONTUÁRIO
+1 - Adicionar consulta ao prontuário
+2 - Mostrar histórico do paciente
+3 - Apagar todo o histórico do paciente
+
+🚑 EMERGÊNCIA
+4 - Adicionar paciente à emergência
+5 - Atender próximo paciente
+6 - Mostrar fila da emergência
+
+0 - Sair
+===========================================
+`);
+
+    rl.question("Escolha uma opção: ", (op) => {
+        switch (op) {
+
+            // ======= PRONTUÁRIO ======= //
+
+            case "1":
+                rl.question("Data (DD-MM-YYYY): ", (date) => {
+                    rl.question("Hora (HH:MM): ", (time) => {
+                        rl.question("Médico: ", (doctor) => {
+                            rl.question("Diagnóstico: ", (diagnosis) => {
+                                history.addConsultation(date, time, doctor, diagnosis);
+                                console.log("\n✅ Consulta adicionada!");
+                                menu();
+                            });
+                        });
+                    });
+                });
+                break;
+
+            case "2":
+                history.printHistory();
+                menu();
+                break;
+
+            case "3":
+                history.clearHistory();
+                menu();
+                break;
+
+            // ======= EMERGÊNCIA ======= //
+
+            case "4":
+                rl.question("Nome do paciente: ", (name) => {
+                    if (name.trim() === "") {
+                        console.log("\n⚠ Nome inválido.");
+                    } else {
+                        emergency.enqueue(name);
+                        console.log(\n🚑 Paciente "${name}" adicionado à fila!);
+                    }
+                    menu();
+                });
+                break;
+
+            case "5":
+                const next = emergency.dequeue();
+                if (!next) {
+                    console.log("\n⚠ Nenhum paciente para atender.");
+                } else {
+                    console.log(\n🩺 Chamando paciente: ${next});
+                }
+                menu();
+                break;
+
+            case "6":
+                emergency.showQueue();
+                menu();
+                break;
+
+            // ======= SAIR ======= //
+
+            case "0":
+                console.log("\n👋 Encerrando...");
+                rl.close();
+                break;
+
+            default:
+                console.log("\n❌ Opção inválida.");
+                menu();
+                break;
+        }
+    });
+}
+
+menu();
