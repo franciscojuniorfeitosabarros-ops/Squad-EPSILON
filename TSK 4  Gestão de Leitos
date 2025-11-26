@@ -1,0 +1,303 @@
+const readline = require("readline");
+
+// =============== LISTA DE MÉDICOS =============== //
+class DoctorDirectory {
+    constructor() {
+        this.doctors = [
+            { name: "Dr. Carlos", specialty: "Cardiologista", keywords: ["coração", "dor no peito", "pressão", "infarto"] },
+            { name: "Dr. Ana", specialty: "Neurologista", keywords: ["cabeça", "enxaqueca", "convulsão", "nervos", "dor de cabeça"] },
+            { name: "Dr. Silva", specialty: "Ortopedista", keywords: ["osso", "fratura", "joelho", "coluna", "torção"] },
+            { name: "Dra. Beatriz", specialty: "Pediatra", keywords: ["criança", "bebê", "febre infantil"] },
+            { name: "Dr. João", specialty: "Clínico Geral", keywords: ["febre", "mal estar", "cansaço", "fraqueza"] },
+            { name: "Dr. Ricardo", specialty: "Cirurgião", keywords: ["cirurgia", "operação", "procedimento"] }
+        ];
+    }
+
+    findDoctorBySituation(situation) {
+        const s = situation.toLowerCase();
+        for (let doc of this.doctors) {
+            for (let key of doc.keywords) {
+                if (s.includes(key)) {
+                    console.log(\n👨‍⚕ Médico recomendado: ${doc.name} (${doc.specialty}));
+                    return;
+                }
+            }
+        }
+        console.log("\n⚠ Nenhum médico específico encontrado. Recomendado: Clínico Geral (Dr. João)");
+    }
+
+    listDoctors() {
+        console.log("\n👨‍⚕ LISTA DE MÉDICOS:");
+        this.doctors.forEach((d, i) => console.log(${i+1}. ${d.name} - ${d.specialty}));
+    }
+}
+
+const directory = new DoctorDirectory();
+
+// =============== PRONTUÁRIO (LinkedList) =============== //
+class ConsultationNode {
+    constructor(patient, date, time, doctor, diagnosis) {
+        this.patient = patient;
+        this.date = date;
+        this.time = time;
+        this.doctor = doctor;
+        this.diagnosis = diagnosis;
+        this.next = null;
+    }
+}
+
+class MedicalHistory {
+    constructor() {
+        this.head = null;
+    }
+
+    addConsultation(patient, date, time, doctor, diagnosis) {
+        const newNode = new ConsultationNode(patient, date, time, doctor, diagnosis);
+        if (!this.head) {
+            this.head = newNode;
+            return;
+        }
+        let curr = this.head;
+        while (curr.next) curr = curr.next;
+        curr.next = newNode;
+    }
+
+    printHistory() {
+        if (!this.head) {
+            console.log("\n⚠ Prontuário vazio.");
+            return;
+        }
+        console.log("\n📘 HISTÓRICO DE CONSULTAS:");
+        let curr = this.head, i = 1;
+        while (curr) {
+            console.log(\nAtendimento #${i});
+            console.log(Paciente: ${curr.patient});
+            console.log(📅 Data: ${curr.date}  ⏰ Hora: ${curr.time});
+            console.log(👨‍⚕ Médico: ${curr.doctor});
+            console.log(📝 Diagnóstico: ${curr.diagnosis});
+            curr = curr.next;
+            i++;
+        }
+    }
+
+    clearHistory() {
+        this.head = null;
+        console.log("\n🗑 Todo histórico do prontuário foi apagado!");
+    }
+}
+
+const history = new MedicalHistory();
+
+// =============== FILA TRIAGEM (FIFO) =============== //
+class TriageQueue {
+    constructor() { this.queue = []; }
+    enqueue(p) { this.queue.push(p); }
+    dequeue() { return this.queue.shift(); }
+    show() {
+        if (!this.queue.length) console.log("\n🚑 Fila de triagem vazia.");
+        else {
+            console.log("\n🚑 FILA DE TRIAGEM:");
+            this.queue.forEach((p, i) => console.log(${i+1}. ${p}));
+        }
+    }
+}
+
+const triage = new TriageQueue();
+
+// =============== PILHA CIRURGIAS POR PACIENTE =============== //
+class SurgeryStack {
+    constructor() { this.map = new Map(); }
+    ensureStack(p) { if (!this.map.has(p)) this.map.set(p, []); return this.map.get(p);}
+    pushStep(p, step) { this.ensureStack(p).push(step); console.log(\n✅ Passo registrado para ${p});}
+    undoStep(p) {
+        const s = this.ensureStack(p);
+        if (!s.length) console.log(\n⚠ Nenhum passo para desfazer em ${p});
+        else console.log(\n↩ Passo desfeito de ${p}: ${s.pop()});
+    }
+    showChecklist(p) {
+        const s = this.ensureStack(p);
+        if (!s.length) console.log(\n🩺 Nenhum passo registrado para ${p});
+        else {
+            console.log(\n🩺 CHECKLIST DE ${p} (Topo → Base):);
+            for (let i = s.length-1; i>=0; i--) console.log(- ${s[i]});
+        }
+    }
+}
+const surgery = new SurgeryStack();
+
+// =============== GESTÃO DE LEITOS UTI =============== //
+class UtiBedManager {
+    constructor() { this.beds = new Array(10).fill(null); }
+
+    assignBed(number, patient) {
+        if (number < 0 || number > 9) {
+            console.log("\n⚠ Número de leito inválido. Escolha 0–9");
+            return;
+        }
+        if (this.beds[number] !== null) {
+            console.log(\n❌ Leito ${number} ocupado por ${this.beds[number]});
+        } else {
+            this.beds[number] = patient;
+            console.log(\n🛏 Leito ${number} atribuído para ${patient});
+        }
+    }
+
+    releaseBed(number) {
+        if (number < 0 || number > 9) {
+            console.log("\n⚠ Número inválido. Escolha 0–9");
+            return;
+        }
+        if (this.beds[number] === null) {
+            console.log(\n✅ Leito ${number} já está livre.);
+        } else {
+            console.log(\n♻ Leito ${number} liberado (Paciente: ${this.beds[number]}));
+            this.beds[number] = null;
+        }
+    }
+
+    checkAvailability() {
+        const free = this.beds.filter(b => b === null).length;
+        console.log(\n🔎 Leitos livres: ${free} de 10);
+        return free;
+    }
+
+    showBeds() {
+        console.log("\n🩺 STATUS DOS LEITOS DA UTI:");
+        this.beds.forEach((b,i) =>
+            console.log(Leito ${i}: ${b === null ? "🟩 Livre" : "🔴 Ocupado por " + b})
+        );
+    }
+}
+
+const utiManager = new UtiBedManager();
+
+// =============== INTERFACE MENU =============== //
+const rl = readline.createInterface({input: process.stdin, output: process.stdout});
+
+function menu() {
+    console.log(`
+================= SISTEMA HIS =================
+
+📘 PRONTUÁRIO
+1 - Adicionar consulta
+2 - Mostrar histórico
+3 - Apagar histórico
+
+🚑 TRIAGEM
+4 - Chegar paciente na recepção
+5 - Atender próximo da triagem
+6 - Mostrar fila da triagem
+
+🏥 CIRURGIAS
+7 - Registrar passo da cirurgia do paciente
+8 - Desfazer último passo da cirurgia do paciente
+9 - Mostrar checklist da cirurgia do paciente
+
+👨‍⚕ MÉDICO
+10 - Buscar doutor adequado pela situação
+
+🛏 UTI
+11 - Atribuir leito da UTI
+12 - Liberar leito da UTI
+13 - Mostrar status dos leitos da UTI
+14 - Contar leitos livres da UTI
+
+0 - Sair
+==============================================
+`);
+
+    rl.question("Opção: ", (op) => {
+        switch(op) {
+            case "1":
+                rl.question("Paciente: ", (p) => {
+                    rl.question("Data (DD-MM-YYYY): ", (date) => {
+                        rl.question("Hora (HH:MM): ", (time) => {
+                            rl.question("Médico: ", (doc) => {
+                                rl.question("Diagnóstico: ", (diag) => {
+                                    history.addConsultation(p, date, time, doc, diag);
+                                    console.log("\n✅ Consulta registrada!");
+                                    menu();
+                                });
+                            });
+                        });
+                    });
+                });
+                break;
+            case "2": history.printHistory(); menu(); break;
+            case "3": history.clearHistory(); menu(); break;
+
+            case "4":
+                rl.question("Paciente chegando na recepção: ", (n) => {
+                    if (!n.trim()) console.log("\n⚠ Nome inválido.");
+                    else {
+                        triage.enqueue(n);
+                        console.log(\n🚑 Paciente "${n}" entrou na fila.);
+                    }
+                    menu();
+                });
+                break;
+            case "5":
+                const t = triage.dequeue();
+                console.log(t ? \n🩺 Paciente chamado: ${t} : "\n⚠ Fila vazia.");
+                menu();
+                break;
+            case "6": triage.show(); menu(); break;
+
+            case "7":
+                rl.question("Paciente da cirurgia: ", (p) => {
+                    rl.question("Passo do procedimento: ", (s) => {
+                        if(!s.trim()) console.log("\n⚠ Inválido.");
+                        else surgery.pushStep(p, s);
+                        menu();
+                    });
+                });
+                break;
+            case "8":
+                rl.question("Paciente para desfazer: ", (p) => {
+                    surgery.undoStep(p);
+                    menu();
+                });
+                break;
+            case "9":
+                rl.question("Paciente para ver checklist: ", (p) => {
+                    surgery.showChecklist(p);
+                    menu();
+                });
+                break;
+
+            case "10":
+                rl.question("Situação atual / sintomas do paciente: ", (s) => {
+                    directory.findDoctorBySituation(s);
+                    menu();
+                });
+                break;
+
+            case "11":
+                rl.question("Leito da UTI (0–9): ", (num) => {
+                    rl.question("Paciente: ", (p) => {
+                        utiManager.assignBed(Number(num), p);
+                        menu();
+                    });
+                });
+                break;
+            case "12":
+                rl.question("Leito para liberar (0–9): ", (num) => {
+                    utiManager.releaseBed(Number(num));
+                    menu();
+                });
+                break;
+            case "13": utiManager.showBeds(); menu(); break;
+            case "14": utiManager.checkAvailability(); menu(); break;
+
+            case "0":
+                console.log("\n👋 Encerrando...");
+                rl.close();
+                break;
+            default:
+                console.log("\n❌ Opção inválida.");
+                menu();
+        }
+    });
+}
+
+menu();
