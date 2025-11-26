@@ -27,7 +27,7 @@ class DoctorDirectory {
     }
 
     listDoctors() {
-        console.log("\n👨‍⚕ LISTA DE MÉDICOS:");
+        console.log("\n LISTA DE MÉDICOS:");
         this.doctors.forEach((d, i) => console.log(${i+1}. ${d.name} - ${d.specialty}));
     }
 }
@@ -67,14 +67,14 @@ class MedicalHistory {
             console.log("\n⚠ Prontuário vazio.");
             return;
         }
-        console.log("\n📘 HISTÓRICO DE CONSULTAS:");
+        console.log("\n HISTÓRICO DE CONSULTAS:");
         let curr = this.head, i = 1;
         while (curr) {
             console.log(\nAtendimento #${i});
             console.log(Paciente: ${curr.patient});
-            console.log(📅 Data: ${curr.date}  ⏰ Hora: ${curr.time});
-            console.log(👨‍⚕ Médico: ${curr.doctor});
-            console.log(📝 Diagnóstico: ${curr.diagnosis});
+            console.log( Data: ${curr.date}  ⏰ Hora: ${curr.time});
+            console.log( Médico: ${curr.doctor});
+            console.log( Diagnóstico: ${curr.diagnosis});
             curr = curr.next;
             i++;
         }
@@ -108,7 +108,7 @@ const triage = new TriageQueue();
 class SurgeryStack {
     constructor() { this.map = new Map(); }
     ensureStack(p) { if (!this.map.has(p)) this.map.set(p, []); return this.map.get(p);}
-    pushStep(p, step) { this.ensureStack(p).push(step); console.log(\n✅ Passo registrado para ${p});}
+    pushStep(p, step) { this.ensureStack(p).push(step); console.log(\n Passo registrado para ${p});}
     undoStep(p) {
         const s = this.ensureStack(p);
         if (!s.length) console.log(\n⚠ Nenhum passo para desfazer em ${p});
@@ -116,9 +116,9 @@ class SurgeryStack {
     }
     showChecklist(p) {
         const s = this.ensureStack(p);
-        if (!s.length) console.log(\n🩺 Nenhum passo registrado para ${p});
+        if (!s.length) console.log(\n Nenhum passo registrado para ${p});
         else {
-            console.log(\n🩺 CHECKLIST DE ${p} (Topo → Base):);
+            console.log(\n CHECKLIST DE ${p} (Topo → Base):);
             for (let i = s.length-1; i>=0; i--) console.log(- ${s[i]});
         }
     }
@@ -135,7 +135,7 @@ class UtiBedManager {
             return;
         }
         if (this.beds[number] !== null) {
-            console.log(\n❌ Leito ${number} ocupado por ${this.beds[number]});
+            console.log(\n Leito ${number} ocupado por ${this.beds[number]});
         } else {
             this.beds[number] = patient;
             console.log(\n🛏 Leito ${number} atribuído para ${patient});
@@ -148,23 +148,23 @@ class UtiBedManager {
             return;
         }
         if (this.beds[number] === null) {
-            console.log(\n✅ Leito ${number} já está livre.);
+            console.log(\n Leito ${number} já está livre.);
         } else {
-            console.log(\n♻ Leito ${number} liberado (Paciente: ${this.beds[number]}));
+            console.log(\n Leito ${number} liberado (Paciente: ${this.beds[number]}));
             this.beds[number] = null;
         }
     }
 
     checkAvailability() {
         const free = this.beds.filter(b => b === null).length;
-        console.log(\n🔎 Leitos livres: ${free} de 10);
+        console.log(\n Leitos livres: ${free} de 10);
         return free;
     }
 
     showBeds() {
-        console.log("\n🩺 STATUS DOS LEITOS DA UTI:");
+        console.log("\n STATUS DOS LEITOS DA UTI:");
         this.beds.forEach((b,i) =>
-            console.log(Leito ${i}: ${b === null ? "🟩 Livre" : "🔴 Ocupado por " + b})
+            console.log(Leito ${i}: ${b === null ? " Livre" : " Ocupado por " + b})
         );
     }
 }
@@ -178,22 +178,22 @@ function menu() {
     console.log(`
 ================= SISTEMA HIS =================
 
-📘 PRONTUÁRIO
+ PRONTUÁRIO
 1 - Adicionar consulta
 2 - Mostrar histórico
 3 - Apagar histórico
 
-🚑 TRIAGEM
+ TRIAGEM
 4 - Chegar paciente na recepção
 5 - Atender próximo da triagem
 6 - Mostrar fila da triagem
 
-🏥 CIRURGIAS
+ CIRURGIAS
 7 - Registrar passo da cirurgia do paciente
 8 - Desfazer último passo da cirurgia do paciente
 9 - Mostrar checklist da cirurgia do paciente
 
-👨‍⚕ MÉDICO
+ MÉDICO
 10 - Buscar doutor adequado pela situação
 
 🛏 UTI
@@ -215,7 +215,7 @@ function menu() {
                             rl.question("Médico: ", (doc) => {
                                 rl.question("Diagnóstico: ", (diag) => {
                                     history.addConsultation(p, date, time, doc, diag);
-                                    console.log("\n✅ Consulta registrada!");
+                                    console.log("\n Consulta registrada!");
                                     menu();
                                 });
                             });
@@ -231,14 +231,14 @@ function menu() {
                     if (!n.trim()) console.log("\n⚠ Nome inválido.");
                     else {
                         triage.enqueue(n);
-                        console.log(\n🚑 Paciente "${n}" entrou na fila.);
+                        console.log(\n Paciente "${n}" entrou na fila.);
                     }
                     menu();
                 });
                 break;
             case "5":
                 const t = triage.dequeue();
-                console.log(t ? \n🩺 Paciente chamado: ${t} : "\n⚠ Fila vazia.");
+                console.log(t ? \n Paciente chamado: ${t} : "\n⚠ Fila vazia.");
                 menu();
                 break;
             case "6": triage.show(); menu(); break;
@@ -290,11 +290,11 @@ function menu() {
             case "14": utiManager.checkAvailability(); menu(); break;
 
             case "0":
-                console.log("\n👋 Encerrando...");
+                console.log("\n Encerrando...");
                 rl.close();
                 break;
             default:
-                console.log("\n❌ Opção inválida.");
+                console.log("\n Opção inválida.");
                 menu();
         }
     });
