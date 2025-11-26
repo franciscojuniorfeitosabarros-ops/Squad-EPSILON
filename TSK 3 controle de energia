@@ -27,7 +27,7 @@ class DoctorDirectory {
     }
 
     listDoctors() {
-        console.log("\n👨‍⚕ MÉDICOS DISPONÍVEIS:");
+        console.log("\n MÉDICOS DISPONÍVEIS:");
         this.doctors.forEach((d, i) => console.log(${i+1}. ${d.name} - ${d.specialty}));
     }
 }
@@ -66,14 +66,14 @@ class MedicalHistory {
             console.log("\n⚠ Nenhuma consulta no prontuário.");
             return;
         }
-        console.log("\n📘 HISTÓRICO MÉDICO DO PACIENTE:");
+        console.log("\n HISTÓRICO MÉDICO DO PACIENTE:");
         let curr = this.head, i = 1;
         while (curr) {
             console.log(\nConsulta #${i});
-            console.log(📅 Data: ${curr.date});
-            console.log(⏰ Hora: ${curr.time});
-            console.log(👨‍⚕ Médico: ${curr.doctor});
-            console.log(📝 Diagnóstico: ${curr.diagnosis});
+            console.log( Data: ${curr.date});
+            console.log( Hora: ${curr.time});
+            console.log( Médico: ${curr.doctor});
+            console.log( Diagnóstico: ${curr.diagnosis});
             curr = curr.next;
             i++;
         }
@@ -96,7 +96,7 @@ class TriageQueue {
     dequeue() { return this.queue.shift(); }
     show() {
         if (!this.queue.length) {
-            console.log("\n🏥 Fila de triagem vazia.");
+            console.log("\n Fila de triagem vazia.");
             return;
         }
         console.log("\n🚑 FILA DE TRIAGEM:");
@@ -120,7 +120,7 @@ class SurgeryStack {
     pushStep(patient, step) {
         const st = this.ensureStack(patient);
         st.push(step);
-        console.log(\n✅ Passo "${step}" registrado para ${patient});
+        console.log(\n Passo "${step}" registrado para ${patient});
     }
 
     undoStep(patient) {
@@ -131,9 +131,9 @@ class SurgeryStack {
 
     showChecklist(patient) {
         const st = this.ensureStack(patient);
-        if (!st.length) console.log(\n🩺 Nenhum passo registrado na cirurgia de ${patient});
+        if (!st.length) console.log(\n Nenhum passo registrado na cirurgia de ${patient});
         else {
-            console.log(\n🩺 CHECKLIST CIRÚRGICO DE ${patient} (Topo → Base):);
+            console.log(\n CHECKLIST CIRÚRGICO DE ${patient} (Topo → Base):);
             for (let i = st.length-1; i >= 0; i--) console.log(- ${st[i]});
         }
     }
@@ -148,22 +148,22 @@ function menu() {
     console.log(`
 ================== SISTEMA HOSPITALAR (HIS + Telemedicina) ==================
 
-📘 PRONTUÁRIO
+ PRONTUÁRIO
 1 - Adicionar consulta ao prontuário
 2 - Mostrar histórico do paciente
 3 - Apagar histórico do prontuário
 
-🚑 TRIAGEM INICIAL
+ TRIAGEM INICIAL
 4 - Chegar paciente na recepção
 5 - Atender próximo paciente da triagem
 6 - Mostrar fila de triagem
 
-🏥 CIRURGIAS - CHECKLIST
+ CIRURGIAS - CHECKLIST
 7 - Registrar passo da cirurgia do paciente
 8 - Desfazer último passo da cirurgia do paciente
 9 - Mostrar checklist da cirurgia do paciente
 
-👨‍⚕ ENCONTRAR DOUTOR ADEQUADO
+ ENCONTRAR DOUTOR ADEQUADO
 10 - Buscar doutor ideal para situação atual do paciente
 
 0 - Sair
@@ -198,7 +198,7 @@ function menu() {
                 break;
             case "5":
                 const next = triage.dequeue();
-                console.log(next ? \n🩺 Atendendo: ${next} : "\n⚠ Fila vazia.");
+                console.log(next ? \n Atendendo: ${next} : "\n⚠ Fila vazia.");
                 menu();
                 break;
             case "6": triage.show(); menu(); break;
@@ -231,12 +231,12 @@ function menu() {
                 break;
 
             case "0":
-                console.log("\n👋 Sistema encerrado!");
+                console.log("\n Sistema encerrado!");
                 rl.close();
                 break;
 
             default:
-                console.log("\n❌ Opção inválida.");
+                console.log("\n Opção inválida.");
                 menu();
         }
     });
