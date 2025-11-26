@@ -1,0 +1,326 @@
+const readline = require("readline");
+
+// =============== DIRETÓRIO DE MÉDICOS =============== //
+class DoctorDirectory {
+  constructor() {
+    this.doctors = [
+      { name: "Dr. Carlos", specialty: "Cardiologista", keywords: ["coração", "dor no peito", "pressão", "infarto"] },
+      { name: "Dr. Ana", specialty: "Neurologista", keywords: ["cabeça", "enxaqueca", "convulsão", "nervos", "dor de cabeça"] },
+      { name: "Dr. Silva", specialty: "Ortopedista", keywords: ["osso", "fratura", "joelho", "coluna", "torção"] },
+      { name: "Dra. Beatriz", specialty: "Pediatra", keywords: ["criança", "bebê", "febre infantil"] },
+      { name: "Dr. João", specialty: "Clínico Geral", keywords: ["febre", "mal estar", "cansaço", "fraqueza"] },
+      { name: "Dr. Ricardo", specialty: "Cirurgião", keywords: ["cirurgia", "operação", "procedimento"] },
+      { name: "Dr. Rafael", specialty: "Radiologista", keywords: ["mri", "tomografia", "ressonância", "imagem"] }
+    ];
+  }
+  findDoctorBySituation(sit) {
+    const s = sit.toLowerCase();
+    for (let d of this.doctors) {
+      for (let key of d.keywords) {
+        if (s.includes(key)) {
+          console.log(\n Médico adequado: ${d.name} (${d.specialty}));
+          return;
+        }
+      }
+    }
+    console.log(\n⚠ Nenhuma correspondência exata. Recomenda-se o Dr. João (Clínico Geral).);
+  }
+}
+
+const directory = new DoctorDirectory();
+
+// =============== PRONTUÁRIO (Lista ligada simples) =============== //
+class ConsultationNode {
+  constructor(patient, date, time, doctor, diagnostic) {
+    this.patient = patient;
+    this.date = date;
+    this.time = time;
+    this.doctor = doctor;
+    this.diagnostic = diagnostic;
+    this.next = null;
+  }
+}
+
+class MedicalHistory {
+  constructor() {
+    this.head = null;
+  }
+
+  addConsultation(patient, date, time, doctor, diagnostic) {
+    const newNode = new ConsultationNode(patient, date, time, doctor, diagnostic);
+    if (!this.head) {
+      this.head = newNode;
+    } else {
+      let current = this.head;
+      while (current.next) {
+        current = current.next;
+      }
+      current.next = newNode;
+    }
+    console.log("\n Consulta adicionada!");
+  }
+
+  printHistory() {
+    if (!this.head) {
+      console.log("\n Histórico médico vazio.");
+      return;
+    }
+    console.log("\n Jornada do Paciente:");
+    let current = this.head;
+    let count = 1;
+    while (current) {
+      console.log(\n#${count} | Paciente: ${current.patient} | Data: ${current.date} |  Hora: ${current.time} |  Médico: ${current.doctor} |  Diagnóstico: ${current.diagnostic});
+      current = current.next;
+      count++;
+    }
+  }
+
+  clearHistory() {
+    this.head = null;
+    console.log("\n🗑 Histórico médico apagado com sucesso!");
+  }
+}
+
+const history = new MedicalHistory();
+
+// =============== TRIAGEM (Fila FIFO) =============== //
+class TriageQueue {
+  constructor() {
+    this.queue = [];
+  }
+  enqueue(name) {
+    this.queue.push(name);
+    console.log(\n Paciente "${name}" entrou na triagem.);
+  }
+  dequeue() {
+    return this.queue.shift();
+  }
+  showQueue() {
+    if (!this.queue.length) {
+      console.log("\n Nenhum paciente na fila.");
+      return;
+    }
+    console.log("\n Fila da Triagem:");
+    this.queue.forEach((p, i) => console.log(${i + 1}. ${p}));
+  }
+}
+
+const triage = new TriageQueue();
+
+// =============== CIRURGIA (Stack por paciente) =============== //
+class SurgeryStack {
+  constructor() {
+    this.stacks = new Map();
+  }
+
+  pushStep(patient, step) {
+    if (!this.stacks.has(patient)) {
+      this.stacks.set(patient, []);
+    }
+    this.stacks.get(patient).push(step);
+    console.log(\n Passo "${step}" registrado para ${patient});
+  }
+
+  undoStep(patient) {
+    const stack = this.stacks.get(patient);
+    if (!stack || !stack.length) {
+      console.log(\n⚠ Nenhum passo para desfazer para ${patient});
+      return;
+    }
+    const removed = stack.pop();
+    console.log(\n↩ Último passo desfeito para ${patient}: ${removed});
+  }
+
+  showStack(patient) {
+    const stack = this.stacks.get(patient);
+    if (!stack || !stack.length) {
+      console.log(\n Nenhum passo registrado para ${patient});
+      return;
+    }
+    console.log(\n Checklist cirúrgico para ${patient}:);
+    for (let i = stack.length - 1; i >= 0; i--) {
+      console.log(- ${stack[i]});
+    }
+  }
+}
+
+const surgery = new SurgeryStack();
+
+// =============== GESTÃO DE LEITOS UTI (Vetor 10 posições) =============== //
+class UtiBedManager {
+  constructor() {
+    this.beds = new Array(10).fill(null);
+  }
+  assignBed(num, patient) {
+    if (num < 0 || num > 9) return console.log("\n⚠ Leito inválido (0–9).");
+    if (this.beds[num]) console.log(\n Leito ${num} ocupado por ${this.beds[num]});
+    else { this.beds[num] = patient; console.log(\n🛏 Leito ${num} atribuído a ${patient}); }
+  }
+  releaseBed(num) {
+    if (num < 0 || num > 9) return console.log("\n⚠ inválido.");
+    if (!this.beds[num]) console.log(\n Leito ${num} já está livre.);
+    else { console.log(\n♻ Leito ${num} liberado (era de ${this.beds[num]})); this.beds[num] = null; }
+  }
+  countFree() {
+    const free = this.beds.filter(b => b === null).length;
+    console.log(\n Leitos livres: ${free}/10);
+    return free;
+  }
+  showStatus() {
+    console.log("\n Status dos Leitos UTI:");
+    this.beds.forEach((b, i) => console.log(Leito ${i}: ${b ? " " + b : " Livre"}));
+  }
+}
+
+const utiManager = new UtiBedManager();
+
+// =============== MRI Viewer (Lista duplamente encadeada por paciente) =============== //
+class MriNode {
+  constructor(image) {
+    this.image = image;
+    this.next = null;
+    this.prev = null;
+  }
+}
+
+class MriViewerManager {
+  constructor() {
+    this.lists = new Map();
+    this.currents = new Map();
+  }
+
+  getCurrent(patient) {
+    return this.currents.get(patient) || null;
+  }
+
+  addImage(patient, image) {
+    const newNode = new MriNode(image);
+
+    if (!this.lists.has(patient)) {
+      this.lists.set(patient, newNode);
+      this.currents.set(patient, newNode);
+      console.log(\n Primeiro exame MRI carregado para ${patient}: ${image});
+      return;
+    }
+
+    let last = this.lists.get(patient);
+    while (last.next) last = last.next;
+    last.next = newNode;
+    newNode.prev = last;
+    this.currents.set(patient, newNode);
+
+    console.log(\n Nova fatia adicionada para ${patient}: ${image});
+  }
+
+  nextImage(patient) {
+    const cur = this.getCurrent(patient);
+    if (!cur?.next) return console.log(\n⚠ ${patient} está na última imagem.);
+    this.currents.set(patient, cur.next);
+    console.log(\n👀 (${patient}) Vendo imagem: ${cur.next.image});
+  }
+
+  prevImage(patient) {
+    const cur = this.getCurrent(patient);
+    if (!cur?.prev) return console.log(\n⚠ ${patient} está na primeira imagem.);
+    this.currents.set(patient, cur.prev);
+    console.log(\n👀 (${patient}) Vendo imagem: ${cur.prev.image});
+  }
+
+  showCurrentImage(patient) {
+    const cur = this.getCurrent(patient);
+    console.log(\n (${patient}) Imagem atual: ${cur ? cur.image : "Nenhuma carregada"});
+  }
+
+  clearMri(patient) {
+    this.lists.delete(patient);
+    this.currents.delete(patient);
+    console.log(\n🗑 Histórico de MRI apagado para ${patient});
+  }
+}
+
+const mriManager = new MriViewerManager();
+
+// =============== MENU INTERATIVO =============== //
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+function menu() {
+  console.log(`
+================== S I S T E M A  H I S ==================
+
+📘 PRONTUÁRIO
+1 - Adicionar consulta
+2 - Mostrar histórico
+3 - Apagar histórico
+
+🚑 TRIAGEM
+4 - Chegar paciente na recepção
+5 - Atender próximo da triagem
+6 - Mostrar fila da triagem
+
+🏥 CIRURGIAS
+7 - Registrar passo da cirurgia do paciente
+8 - Desfazer último passo da cirurgia do paciente
+9 - Mostrar checklist da cirurgia do paciente
+
+👨‍⚕ DIRETÓRIO MÉDICO
+10 - Buscar doutor adequado pela situação
+
+🛏 GESTÃO DE LEITOS UTI
+11 - Atribuir leito da UTI
+12 - Liberar leito da UTI
+13 - Mostrar status dos leitos da UTI
+14 - Contar leitos livres da UTI
+
+🧠 EXAMES MRI
+15 - Carregar nova fatia de exame (Imagem/Scan)
+16 - Próxima imagem (Avançar)
+17 - Imagem anterior (Voltar)
+18 - Mostrar imagem atual do paciente
+19 - Apagar histórico de MRI do paciente
+
+0 - Sair
+=========================================================
+`);
+  rl.question("Escolha uma opção: ", (op) => {
+    switch(op) {
+      case "1":
+        rl.question("Paciente: ", p =>
+          rl.question("Data (DD-MM-YYYY): ", d =>
+            rl.question("Hora (HH:MM): ", t =>
+              rl.question("Médico: ", doc =>
+                rl.question("Diagnóstico: ", diag => {
+                  history.addConsultation(p, d, t, doc, diag);
+                  menu();
+                })
+              )
+            )
+          )
+        );
+        break;
+      case "2": history.printHistory(); menu(); break;
+      case "3": history.clearHistory(); menu(); break;
+      case "4":
+        rl.question("Nome do paciente: ", n => { if(n.trim()) triage.enqueue(n); menu(); }); break;
+      case "5":
+        const x = triage.dequeue(); console.log(x ? \n Atendendo: ${x} : "\n⚠ Fila vazia."); menu(); break;
+      case "6": triage.showQueue(); menu(); break;
+      case "7": rl.question("Paciente: ", p => rl.question("Passo: ", s => { if(s.trim()) surgery.pushStep(p, s); menu(); })); break;
+      case "8": rl.question("Paciente: ", p => { surgery.undoStep(p); menu(); }); break;
+      case "9": rl.question("Paciente: ", p => { surgery.showStack(p); menu(); }); break;
+      case "10": rl.question("Situação: ", s => { directory.findDoctorBySituation(s); menu(); }); break;
+      case "11": rl.question("Leito (0–9): ", n => rl.question("Paciente: ", p => { utiManager.assignBed(Number(n), p); menu(); })); break;
+      case "12": rl.question("Leito (0–9): ", n => { utiManager.releaseBed(Number(n)); menu(); }); break;
+      case "13": utiManager.showStatus(); menu(); break;
+      case "14": utiManager.countFree(); menu(); break;
+      case "15": rl.question("Paciente do exame: ", p => rl.question("Link/ID da imagem: ", img => { if(img.trim()) mriManager.addImage(p, img); menu(); })); break;
+      case "16": rl.question("Paciente: ", p => { mriManager.nextImage(p); menu(); }); break;
+      case "17": rl.question("Paciente: ", p => { mriManager.prevImage(p); menu(); }); break;
+      case "18": rl.question("Paciente: ", p => { mriManager.showCurrentImage(p); menu(); }); break;
+      case "19": rl.question("Paciente: ", p => { mriManager.clearMri(p); menu(); }); break;
+      case "0": console.log("\n Sistema finalizado."); rl.close(); break;
+      default: console.log("\n Opção inválida."); menu();
+    }
+  });
+}
+
+menu();
