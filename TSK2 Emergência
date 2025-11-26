@@ -38,17 +38,17 @@ class MedicalHistory {
             return;
         }
 
-        console.log("\n📘 HISTÓRICO MÉDICO DO PACIENTE:");
+        console.log("\n HISTÓRICO MÉDICO DO PACIENTE:");
 
         let current = this.head;
         let count = 1;
 
         while (current) {
             console.log(\nConsulta #${count});
-            console.log(📅 Data: ${current.date});
-            console.log(⏰ Hora: ${current.time});
-            console.log(👨‍⚕ Médico: ${current.doctor});
-            console.log(📝 Diagnóstico: ${current.diagnosis});
+            console.log( Data: ${current.date});
+            console.log( Hora: ${current.time});
+            console.log( Médico: ${current.doctor});
+            console.log( Diagnóstico: ${current.diagnosis});
 
             current = current.next;
             count++;
@@ -77,11 +77,11 @@ class EmergencyQueue {
 
     showQueue() {
         if (this.queue.length === 0) {
-            console.log("\n🏥 Nenhum paciente aguardando.");
+            console.log("\n Nenhum paciente aguardando.");
             return;
         }
 
-        console.log("\n🚑 PACIENTES NA FILA:");
+        console.log("\n PACIENTES NA FILA:");
         this.queue.forEach((p, i) => {
             console.log(${i + 1}. ${p});
         });
@@ -102,12 +102,12 @@ function menu() {
     console.log(`
 =============== SISTEMA HIS ===============
 
-📘 PRONTUÁRIO
+ PRONTUÁRIO
 1 - Adicionar consulta ao prontuário
 2 - Mostrar histórico do paciente
 3 - Apagar todo o histórico do paciente
 
-🚑 EMERGÊNCIA
+ EMERGÊNCIA
 4 - Adicionar paciente à emergência
 5 - Atender próximo paciente
 6 - Mostrar fila da emergência
@@ -127,7 +127,7 @@ function menu() {
                         rl.question("Médico: ", (doctor) => {
                             rl.question("Diagnóstico: ", (diagnosis) => {
                                 history.addConsultation(date, time, doctor, diagnosis);
-                                console.log("\n✅ Consulta adicionada!");
+                                console.log("\n Consulta adicionada!");
                                 menu();
                             });
                         });
@@ -164,7 +164,7 @@ function menu() {
                 if (!next) {
                     console.log("\n⚠ Nenhum paciente para atender.");
                 } else {
-                    console.log(\n🩺 Chamando paciente: ${next});
+                    console.log(\n Chamando paciente: ${next});
                 }
                 menu();
                 break;
@@ -177,12 +177,12 @@ function menu() {
             // ======= SAIR ======= //
 
             case "0":
-                console.log("\n👋 Encerrando...");
+                console.log("\n Encerrando...");
                 rl.close();
                 break;
 
             default:
-                console.log("\n❌ Opção inválida.");
+                console.log("\n Opção inválida.");
                 menu();
                 break;
         }
